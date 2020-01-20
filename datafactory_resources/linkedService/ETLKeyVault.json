@@ -1,0 +1,10 @@
+{
+	"name": "ETLKeyVault",
+	"properties": {
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://devkv-zhjxvjgmd3hfa.vault.azure.net/"
+		}
+	}
+}

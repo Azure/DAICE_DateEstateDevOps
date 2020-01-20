@@ -1,0 +1,17 @@
+{
+	"name": "etlserver",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ETLKeyVault",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "sqlconnstr"
+			}
+		}
+	}
+}

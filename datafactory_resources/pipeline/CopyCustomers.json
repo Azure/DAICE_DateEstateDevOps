@@ -1,0 +1,53 @@
+{
+	"name": "CopyCustomers",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy Data Lake to SQL",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink"
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "datastore_raw_customers",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "etlserver_generic_table",
+						"type": "DatasetReference",
+						"parameters": {
+							"table_schema": "dbo",
+							"table_name": "customers"
+						}
+					}
+				]
+			}
+		],
+		"annotations": []
+	}
+}
