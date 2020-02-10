@@ -1,5 +1,9 @@
 # Data Estate DevOps
 
+<p align="center">
+  <img src="./docs/img/ReleaseResources.jpg" alt="Release Data Factory, SQL, and Databricks Resources for QA and Production.">
+</p>
+
 This repository provides sample code and instructions for creating a DevOps pipeline for Azure Data Factory, a SQL database project, and Databricks Notebooks.  Included in this repo are:
 
 * Infrastructure (ARM Templates) for Azure resources supporting a set of ETL jobs.
@@ -9,7 +13,17 @@ This repository provides sample code and instructions for creating a DevOps pipe
 
 ## Table of Contents
 
+* [SQL Build Pipeline](#sql-build-pipeline)
+* [Release Data Estate Infrastructure](#release-data-estate-infrastructure)
+* [Release ADF Pipeline, SQL, and Databricks](#release-adf-pipeline-sql-and-databricks)
+* [Manual Steps](#manual-steps)
+
+
 ## Instructions
+
+In Azure DevOps, you'll need to [import this git repository](https://docs.microsoft.com/en-us/azure/devops/repos/git/import-git-repository?view=azure-devops) into your repo.  This allows you to essentially fork this repo and experiment with changing the folders, adding files, etc.
+
+With that step done, follow the steps below to create your build and release pipelines.
 
 ### SQL Build Pipeline
 
@@ -35,6 +49,10 @@ The SQL Build Pipeline will create a SQL Data-Tier Application file that can be 
 
 ### Release Data Estate Infrastructure
 
+<p align="center">
+  <img src="./docs/img/ReleaseInfraPipe.jpg" alt="Release Infrastructure Pipeline">
+</p>
+
 This release pipeline will deploy the necessary resources to have a working ETL pipeline.  Including Azure Data Factory, Databricks, SQL DB, Storage Accounts, Key Vault, and several secrets created automatically.  The secrets are: 
 * sqlconnstr - the SQL connection string using admin name and password.
 * datastoragekey - the Primary Key from the data storage account that would house your landed data.
@@ -54,7 +72,7 @@ This release pipeline will deploy the necessary resources to have a working ETL 
   * Template: `$(System.DefaultWorkingDirectory)/_infrastructure/azuredeploy.json`
   * Deployment Mode: `Incremental`
   * "Override template parameters" for each task with something similar to:
-    * objectId is a guid for a service principal you must create in advance (see [manual Steps](#manual-steps))
+    * objectId is a guid for a service principal you must create in advance (see [manual Steps](#manual-steps) "Authenticating Azure DevOps with your Subscription")
 
     ```
     -factoryNameRoot "DevFactory" 
@@ -74,7 +92,15 @@ This release pipeline will deploy the necessary resources to have a working ETL 
 
 ### Release ADF Pipeline, SQL, and Databricks
 
+<p align="center">
+  <img src="./docs/img/ReleaseResources.jpg" alt="Release Data Factory, SQL, and Databricks Resources.">
+</p>
+
 This release pipeline will deploy the resources and files that make up an ETL pipeline.  Specifically, Azure Data Factory (ADF) Pipelines, ADF Datasets, ADF Linked Services,  Databricks Notebook, and SQL DB Schema Changes.  It uses PowerShell to Stop and Start Triggers at the appropriate point and remove any deleted ADF objects since DevOps (by default) will keep any deployed resource if it's not mentioned in the ARM template.
+
+<p align="center">
+  <img src="./docs/img/ReleaseResourcesQAPRodStages.jpg" alt="Release Data Factory, SQL, and Databricks Resources for QA and Production.">
+</p>
 
 * Create an Artifact from the Azure DevOps git repo and name it `_datafactory_resources`.
   * Select the `adf_publish` branch and the latest commit.
@@ -89,7 +115,7 @@ This release pipeline will deploy the resources and files that make up an ETL pi
   * **Azure Key Vault**: Downloading Secrets for DevOps use
     * Select your Azure Subscription and the appropriate stage's Key Vault.
     * Secrets filter should be `databricks-access-token, sqlconnstr`
-    * NOTE: This task will likely fail the first time you run it.  See [manual Steps](#manual-steps) for steps to resolve.
+    * NOTE: This task will likely fail the first time you run it.  See [manual Steps](#manual-steps) "Providing Azure DevOps Key Vault Task with access to your Key Vault" for steps to resolve.
   * **Azure PowerShell**: Stopping Triggers
     * Select your Azure Subscription
     * Set Preferred Azure Powershell Version to `1.0.0`
@@ -141,9 +167,10 @@ This release pipeline will deploy the resources and files that make up an ETL pi
   * **Configure Databricks**: Set Databricks Token
     * Set Workpace URL to the appropriate Azure Databricks URL (e.g. https://westus2.azuredatabricks.net)
     * Set Access Token to `$(databricks-access-token)`.
+    * To generate the token see [manual Steps](#manual-steps) "Creating an Azure Databricks API token must be completed manually".
   * **Deploy Databricks Notebooks**: Copy Notebooks to Databricks
     * Set Notebooks Folder to `$(System.DefaultWorkingDirectory)/_code/notebooks`
-    * Set Workspace Folder to `/`
+    * Set Workspace Folder to `/` this will put any notebook to the root of your workspace.
   * **Azure SQL Database Deployment**: Deploying DacPac file to SQL DB
     * Select your Azure Subscription
     * Set Authentication Type to `Connection String`
@@ -151,6 +178,11 @@ This release pipeline will deploy the resources and files that make up an ETL pi
     * Set Deploy Type to `SQL DACPAC File`
     * Set Action to `Publish`
     * Set DacPac File to `$(System.DefaultWorkingDirectory)/_database/DBDeployment/sqldb/etldb/etldb/bin/Debug/etldb.dacpac`
+
+<p align="center">
+  <img src="./docs/img/ReleaseResourcesDevStage.jpg" alt="Release Data Factory, SQL, and Databricks Resources for Dev.">
+</p>
+
 * (OPTIONAL) Create a Dev Stage that is only set to be released manually
   * A manual release will not be executed unless explicitly ran.
   * Add the following tasks with the same settings as above for the Dev Stage:
