@@ -69,7 +69,7 @@ This release pipeline will deploy the necessary resources to have a working ETL 
   * Action: Create or update resource group
   * Resource Group: `$(RG_NAME)`
   * Location: Your location of choice
-  * Template: `$(System.DefaultWorkingDirectory)/_infrastructure/azuredeploy.json`
+  * Template: `$(System.DefaultWorkingDirectory)/_infrastructure/infrastructure/azuredeploy.json`
   * Deployment Mode: `Incremental`
   * "Override template parameters" for each task with something similar to:
     * objectId is a guid for a service principal you must create in advance (see [manual Steps](#manual-steps) "Authenticating Azure DevOps with your Subscription")
@@ -104,6 +104,8 @@ This release pipeline will deploy the resources and files that make up an ETL pi
 
 * Create an Artifact from the Azure DevOps git repo and name it `_datafactory_resources`.
   * Select the `adf_publish` branch and the latest commit.
+  * You might not see the adf_publish branch as it requires a Dev data factory to have connected with your Azure DevOps repo.
+  * Consider setting up your Dev Data Factory first with [Git Integration](https://docs.microsoft.com/en-us/azure/data-factory/source-control#author-with-azure-repos-git-integration) and publishing the changes on your master branch.
 * Create an Artifact from the Azure DevOps git repo and name it `_code`.
   * Select the `master` branch and the latest commit.
 * Create an Artifact from the Azure DevOps Build and name it `_database`.
